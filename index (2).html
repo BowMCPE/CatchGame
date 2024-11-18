@@ -53,6 +53,7 @@
     <div id="menu">
         <h1>Welcome to the Game</h1>
         <button id="loginButton">Login with Google</button>
+        <button id="guestButton">Play as Guest</button>
         <div id="userInfo" style="display: none;">
             <h2 id="username"></h2>
             <button id="startGame">Start Game</button>
@@ -87,6 +88,7 @@
 
         // DOM Elements
         const loginButton = document.getElementById("loginButton");
+        const guestButton = document.getElementById("guestButton");
         const userInfo = document.getElementById("userInfo");
         const username = document.getElementById("username");
         const startGameButton = document.getElementById("startGame");
@@ -131,10 +133,26 @@
                     userId = user.uid;
                     username.innerText = `Welcome, ${user.displayName}`;
                     loginButton.style.display = "none";
+                    guestButton.style.display = "none";
                     userInfo.style.display = "block";
                     loadProgress(userId);
                 })
                 .catch((error) => console.error("Authentication error:", error));
+        });
+
+        // Guest play functionality
+        guestButton.addEventListener("click", () => {
+            userId = null; // No user ID for guests
+            username.innerText = "Playing as Guest";
+            loginButton.style.display = "none";
+            guestButton.style.display = "none";
+            userInfo.style.display = "block";
+
+            // Reset game data for guests
+            score = 0;
+            coins = 0;
+            level = 1;
+            updateUI();
         });
 
         // Load progress from Firebase
@@ -154,11 +172,13 @@
 
         // Save progress to Firebase
         function saveProgress(userId) {
-            set(ref(database, `users/${userId}`), {
-                score,
-                coins,
-                level
-            }).catch((error) => console.error("Save progress error:", error));
+            if (userId) {
+                set(ref(database, `users/${userId}`), {
+                    score,
+                    coins,
+                    level
+                }).catch((error) => console.error("Save progress error:", error));
+            }
         }
 
         // Update UI
@@ -228,3 +248,4 @@
     </script>
 </body>
 </html>
+
